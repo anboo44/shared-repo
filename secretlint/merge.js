@@ -81,13 +81,28 @@ function mergeSecretlintConfig(defaultConfig, externalConfig) {
                             });
 
                             // Deep merge other options except patterns
-                            const { patterns: _, ...otherExternalOptions } = externalRule.options;
-                            const { patterns: __, ...otherExistingOptions } = existingRule.options;
-                            
+                            const { patterns: _, allows: externalAllows, ...otherExternalOptions } = externalRule.options;
+                            const { patterns: __, allows: existingAllows, ...otherExistingOptions } = existingRule.options;
+
+                            // Merge allows arrays
+                            const mergedAllows = [];
+                            if (existingAllows && Array.isArray(existingAllows)) {
+                                mergedAllows.push(...existingAllows);
+                            }
+                            if (externalAllows && Array.isArray(externalAllows)) {
+                                // Add external allows that don't already exist
+                                externalAllows.forEach(allow => {
+                                    if (!mergedAllows.includes(allow)) {
+                                        mergedAllows.push(allow);
+                                    }
+                                });
+                            }
+
                             merged.rules[existingIndex].options = {
                                 ...otherExistingOptions,
                                 ...otherExternalOptions,
-                                patterns: mergedPatterns
+                                patterns: mergedPatterns,
+                                ...(mergedAllows.length > 0 && { allows: mergedAllows })
                             };
                         } else if (externalRule.options.patterns) {
                             // Only external has patterns, use external patterns + merge other options
