@@ -1,1 +1,0 @@
-This is template reference for Python.
