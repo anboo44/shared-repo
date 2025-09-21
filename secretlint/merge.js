@@ -31,24 +31,18 @@ function mergeSecretlintConfig(defaultConfig, externalConfig) {
                 const existingRule = merged.rules[existingIndex];
                 if (externalRule.options) {
                     if (existingRule.options) {
-                        // Deep merge options
-                        merged.rules[existingIndex].options = {
-                            ...existingRule.options,
-                            ...externalRule.options
-                        };
-
                         // Special handling for patterns array - merge duplicates intelligently
                         if (existingRule.options.patterns && externalRule.options.patterns) {
                             const mergedPatterns = [...existingRule.options.patterns];
 
                             externalRule.options.patterns.forEach(newPattern => {
-                                const existingIndex = mergedPatterns.findIndex(existing =>
+                                const existingPatternIndex = mergedPatterns.findIndex(existing =>
                                     existing.name === newPattern.name
                                 );
 
-                                if (existingIndex !== -1) {
+                                if (existingPatternIndex !== -1) {
                                     // Merge patterns with same name
-                                    const existing = mergedPatterns[existingIndex];
+                                    const existing = mergedPatterns[existingPatternIndex];
 
                                     // If patterns are different, combine them with OR operator
                                     if (existing.pattern !== newPattern.pattern) {
@@ -66,7 +60,7 @@ function mergeSecretlintConfig(defaultConfig, externalConfig) {
                                         // Combine patterns with OR
                                         const combinedPattern = `/(${existingPattern})|(${newPatternClean})/${combinedFlags}`;
 
-                                        mergedPatterns[existingIndex] = {
+                                        mergedPatterns[existingPatternIndex] = {
                                             ...existing,
                                             ...newPattern, // Take other properties from new pattern
                                             pattern: combinedPattern,
@@ -75,7 +69,7 @@ function mergeSecretlintConfig(defaultConfig, externalConfig) {
                                     }
                                     // If patterns are the same, just update other properties
                                     else {
-                                        mergedPatterns[existingIndex] = {
+                                        mergedPatterns[existingPatternIndex] = {
                                             ...existing,
                                             ...newPattern
                                         };
@@ -86,7 +80,34 @@ function mergeSecretlintConfig(defaultConfig, externalConfig) {
                                 }
                             });
 
-                            merged.rules[existingIndex].options.patterns = mergedPatterns;
+                            // Deep merge other options except patterns
+                            const { patterns: _, ...otherExternalOptions } = externalRule.options;
+                            const { patterns: __, ...otherExistingOptions } = existingRule.options;
+                            
+                            merged.rules[existingIndex].options = {
+                                ...otherExistingOptions,
+                                ...otherExternalOptions,
+                                patterns: mergedPatterns
+                            };
+                        } else if (externalRule.options.patterns) {
+                            // Only external has patterns, use external patterns + merge other options
+                            merged.rules[existingIndex].options = {
+                                ...existingRule.options,
+                                ...externalRule.options
+                            };
+                        } else if (existingRule.options.patterns) {
+                            // Only existing has patterns, keep existing patterns + merge other options
+                            const { patterns, ...otherExternalOptions } = externalRule.options;
+                            merged.rules[existingIndex].options = {
+                                ...existingRule.options,
+                                ...otherExternalOptions
+                            };
+                        } else {
+                            // Neither has patterns, simple merge
+                            merged.rules[existingIndex].options = {
+                                ...existingRule.options,
+                                ...externalRule.options
+                            };
                         }
                     } else {
                         merged.rules[existingIndex].options = externalRule.options;
