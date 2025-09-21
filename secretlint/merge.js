@@ -162,7 +162,7 @@ function main() {
                 process.exit(1);
             }
 
-            console.log(`Reading default config from: ${defaultConfigPath}`);
+            // console.log(`Reading default config from: ${defaultConfigPath}`);
             const defaultConfig = JSON.parse(fs.readFileSync(defaultConfigPath, 'utf8'));
 
             console.log(`Writing default config to: ${outputPath}`);
@@ -204,10 +204,10 @@ function main() {
         }
 
         // Read and parse config files
-        console.log(`Reading default config from: ${defaultConfigPath}`);
+        // console.log(`Reading default config from: ${defaultConfigPath}`);
         const defaultConfig = JSON.parse(fs.readFileSync(defaultConfigPath, 'utf8'));
 
-        console.log(`Reading external config from: ${externalConfigPath}`);
+        // console.log(`Reading external config from: ${externalConfigPath}`);
         const externalConfigContent = fs.readFileSync(externalConfigPath, 'utf8').trim();
 
         // Check if external config is empty
@@ -238,21 +238,21 @@ function main() {
         }
 
         // Merge configurations
-        console.log('Merging configurations...');
+        // console.log('Merging configurations...');
         const mergedConfig = mergeSecretlintConfig(defaultConfig, externalConfig);
 
         // Write output
-        console.log(`Writing merged config to: ${outputPath}`);
+        // console.log(`Writing merged config to: ${outputPath}`);
         fs.writeFileSync(outputPath, JSON.stringify(mergedConfig, null, 4));
 
-        console.log('✅ Merge completed successfully!');
-        console.log(`📄 Output file: ${path.resolve(outputPath)}`);
+        // console.log('✅ Merge completed successfully!');
+        // console.log(`📄 Output file: ${path.resolve(outputPath)}`);
 
         // Show summary
-        console.log('\n📊 Merge Summary:');
-        console.log(`- Default rules: ${defaultConfig.rules?.length || 0}`);
-        console.log(`- External rules: ${externalConfig.rules?.length || 0}`);
-        console.log(`- Merged rules: ${mergedConfig.rules?.length || 0}`);
+        // console.log('\n📊 Merge Summary:');
+        // console.log(`- Default rules: ${defaultConfig.rules?.length || 0}`);
+        // console.log(`- External rules: ${externalConfig.rules?.length || 0}`);
+        // console.log(`- Merged rules: ${mergedConfig.rules?.length || 0}`);
 
     } catch (error) {
         console.error('❌ Error during merge:', error.message);
